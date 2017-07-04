@@ -1,0 +1,8 @@
+---
+:ssid: XXXXXXXX
+:pass: XXXXXXXX
+:client_id: XXXXXXXX
+:mqtt_user_name: XXXXXXXX
+:mqtt_pass: XXXXXXXX
+:mqtt_port: 13382
+:mqtt_host: XXXXXXXX.XXXXXXXX.XXXXXXXX
