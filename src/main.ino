@@ -7,9 +7,9 @@
 #include "conf.h"
 #include "funcs.h"
 
-WiFiClient            net;
-MQTTClient            client;
-DHT                   dht(D4, DHT11);
+WiFiClient net;
+MQTTClient client;
+DHT        dht(D4, DHT11);
 StaticJsonBuffer<200> jsonBuffer; // 200 bytes
 JsonObject &jsonRoot = jsonBuffer.createObject();
 
@@ -22,7 +22,7 @@ void setup() {
     Serial.println("");
 
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect(false);
+    WiFi.disconnect(false); // need to call before WiFi.begin()
     WiFi.begin(ssid, pass);
 
     connect();
@@ -39,17 +39,20 @@ void loop() {
     jsonRoot["temperature"]  = dht.readTemperature();
     jsonRoot["ip_addr"]      = WiFi.localIP().toString();
     jsonRoot["rssi"]         = WiFi.RSSI();
+    /**
+    * milis() is the number of miliseconds since
+    * the chip last reset. This means that it'll keep incrementing
+    * until the chip is reset (by button, software, power interruption, ect...)
+    */
     jsonRoot["secs_elapsed"] = millis()/1000;
 
     jsonRoot.printTo(jsonString);
-
     jsonRoot.printTo(Serial);
     Serial.println("");
-
     client.publish(PUBLISH_TOPIC, jsonString);
 
     // take a nap
-    // WiFi.forceSleepBegin();
+    // WiFi.forceSleepBegin(); // if this is uncommented, call dht.begin() at the start of loop()
     delay(LOOP_WAIT_TIME);
     // WiFi.forceSleepWake();
 }

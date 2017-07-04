@@ -4,9 +4,13 @@
 
 #include "conf.h"
 
+// declared in main.ino
 extern MQTTClient client;
 extern WiFiClient net;
 
+// Tries to connect to WiFi and MQTT server
+// if connecting to WiFi times out, the chip will reset in an attempt to
+// connect to wifi again
 void connect() {
   long unsigned int start_milis = millis();
 
@@ -18,7 +22,7 @@ void connect() {
 
     if (millis() - start_milis > WIFI_TIMEOUT_TIME) { // reset if we haven't gotten it yet
       Serial.println("\nResetting...");               // this will go back and start over
-      ESP.reset(); 
+      ESP.reset();
     }
   }
   Serial.print("\nwfifi connected. IP: ");
