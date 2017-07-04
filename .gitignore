@@ -1,0 +1,8 @@
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+native/logfile
+native/data
+native/conf.yaml
+src/conf.h
