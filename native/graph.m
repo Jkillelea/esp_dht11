@@ -7,11 +7,17 @@ rssi  = abs(data(:, 4));
 figure; hold on;
 ylim([0, 100]);
 
-t = t./(60*60); % seconds in an hour
+if max(t) > 60*60
+  t = t./(60*60); % seconds in an hour
+  xlabel('hours');
+else 
+  xlabel('seconds');
+end
 
 plot(t, temp,  'r', 'displayname', 'temperature');
 plot(t, humid, 'b', 'displayname', 'humidity');
 plot(t, rssi,  'g', 'displayname', 'rssi');
+grid on
 legend('show');
 
 pause
