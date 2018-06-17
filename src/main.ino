@@ -15,20 +15,33 @@ DHT dht(13, DHT11);
 #endif
 
 // callback, but we do nothing
-void messageReceived(String topic, String data, char* payloadBytes, unsigned int len) {}
+void messageReceived(String topic, String data, char* payloadBytes, uint32_t len) {}
 
 void setup() {
-  delay(STARTUP_DELAY);
-  Serial.begin(115200);
-  Serial.println("");
-  wifiPrintAvailableNetworks();
+  D delay(STARTUP_DELAY);
+  D Serial.begin(115200);
+  D Serial.println("");
+  D wifiPrintAvailableNetworks();
 
-  WiFi.mode(WIFI_STA);
-  // WiFi.disconnect(false); // need to call before WiFi.begin()
+  // WiFi.mode(WIFI_STA);
+  // WiFi.persistent(true);
+  D Serial.println("dht.begin");
+  dht.begin();
+
+  D Serial.println("WiFi.begin");
   WiFi.begin(WIFI_SSID, WIFI_PW);
+
+  D Serial.println("connect");
   connect();
 
-  dht.begin();
+  D Serial.println("loop");
+  loop();
+
+  D Serial.println("client.disconnect");
+  client.disconnect();
+
+  D Serial.println("ESP.deepSleep");
+  ESP.deepSleep(SLEEP_TIME);
 }
 
 void loop() {
@@ -49,33 +62,33 @@ void loop() {
 // if connecting to WiFi times out, the chip will reset in an attempt to
 // connect to wifi again
 void connect() {
-  const int pause_between_checks = 500; // milliseconds
-  long unsigned int start_milis = millis();
+  const uint32_t pause_between_checks = 500; // milliseconds
+  uint64_t start_milis = millis();
 
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("\nWiFi not connected");
-    Serial.print("connecting to " + String(WIFI_SSID));
+    D Serial.println("\nWiFi not connected");
+    D Serial.print("connecting to " + String(WIFI_SSID));
   
     // wifi connection
     while (WiFi.status() != WL_CONNECTED) {
-      Serial.print(".");
+      D Serial.print(".");
       delay(pause_between_checks);
 
       if (millis() - start_milis > WIFI_TIMEOUT_TIME) { // reset if we haven't gotten it yet
-        Serial.println("\nResetting...");               // this will go back and start over
+        D Serial.println("\nResetting...");               // this will go back and start over
         ESP.restart();
       }
     }
-    Serial.print("\nWiFi connected. IP: ");
-    Serial.print(WiFi.localIP().toString());
-    Serial.print(" RSSI: ");
-    Serial.println(WiFi.RSSI());
+    D Serial.print("\nWiFi connected. IP: ");
+    D Serial.print(WiFi.localIP().toString());
+    D Serial.print(" RSSI: ");
+    D Serial.println(WiFi.RSSI());
   }
 
   // mqtt server connection
   client.begin(mqttHostName, mqttPortNum, net);
   if (!client.connected()) {
-    Serial.println("\nMQTT not connected");
+    D Serial.println("\nMQTT not connected");
 
 #if CONFIG_USE_USER_AND_PASSWORD
     client.connect(clientID.c_str(), mqttUserName, mqttPassword); // first is the for user separation
@@ -83,26 +96,29 @@ void connect() {
     client.connect(clientID.c_str());                             // no encryption on connection
 #endif
 
-    Serial.print("MQTT connecting");
+    D Serial.print("MQTT connecting");
     while (!client.connected()) {                         
-      Serial.print(".");                                  
+      D Serial.print(".");                                  
       delay(pause_between_checks);
 
       if (millis() - start_milis > WIFI_TIMEOUT_TIME) { // reset if we haven't gotten it yet
-        Serial.println("\nResetting...");               // this will go back and start over
+        D Serial.println("\nResetting...");               // this will go back and start over
         ESP.restart();
       }
     }
-    Serial.println("\nMQTT connected.");
+    D Serial.println("\nMQTT connected.");
   }
 }
 
 void wifiPrintAvailableNetworks() {
-  int numNets = WiFi.scanNetworks(false, true); // bool async, bool show_hidden -> return int
-  for (size_t i = 0; i < numNets; i++) {
-    Serial.print(WiFi.SSID(i));
+  uint32_t numNets = WiFi.scanNetworks(false, true); // bool async, bool show_hidden -> return int
+  Serial.println("== SSID : RSSI ==");
+  for (uint32_t i = 0; i < numNets; i++) {
+    String ssid = WiFi.SSID(i);
+    Serial.print(ssid != "" ? ssid : "[Hidden]");
     Serial.print(" : ");
     Serial.print(WiFi.RSSI(i));
     Serial.println(" dBm");
   }
+  Serial.println("======");
 }
