@@ -21,20 +21,18 @@ void setup() {
   D delay(STARTUP_DELAY);
   D Serial.begin(115200);
   D Serial.println("");
-  D wifiPrintAvailableNetworks();
 
-  // WiFi.mode(WIFI_STA);
-  // WiFi.persistent(true);
   D Serial.println("dht.begin");
   dht.begin();
 
   D Serial.println("WiFi.begin");
+  WiFi.mode(WIFI_STA);
+  WiFi.persistent(true);
   WiFi.begin(WIFI_SSID, WIFI_PW);
+  D wifiPrintAvailableNetworks();
 
-  D Serial.println("connect");
   connect();
 
-  D Serial.println("loop");
   loop();
 
   D Serial.println("client.disconnect");
@@ -45,6 +43,7 @@ void setup() {
 }
 
 void loop() {
+  D Serial.println("loop");
   if ((WiFi.status() != WL_CONNECTED) || !client.connected()) // reconnect if lost
     connect();
 
@@ -62,11 +61,12 @@ void loop() {
 // if connecting to WiFi times out, the chip will reset in an attempt to
 // connect to wifi again
 void connect() {
+  D Serial.println("connect");
   const uint32_t pause_between_checks = 500; // milliseconds
   uint64_t start_milis = millis();
 
   if (WiFi.status() != WL_CONNECTED) {
-    D Serial.println("\nWiFi not connected");
+    D Serial.println("WiFi not connected");
     D Serial.print("connecting to " + String(WIFI_SSID));
   
     // wifi connection
@@ -74,7 +74,7 @@ void connect() {
       D Serial.print(".");
       delay(pause_between_checks);
 
-      if (millis() - start_milis > WIFI_TIMEOUT_TIME) { // reset if we haven't gotten it yet
+      if ((millis() - start_milis) > WIFI_TIMEOUT_TIME) { // reset if we haven't gotten it yet
         D Serial.println("\nResetting...");               // this will go back and start over
         ESP.restart();
       }
@@ -92,7 +92,7 @@ void connect() {
 
 #if CONFIG_USE_USER_AND_PASSWORD
     client.connect(clientID.c_str(), mqttUserName, mqttPassword); // first is the for user separation
-#else                                                                // second two are for authentication
+#else                                                             // second two are for authentication
     client.connect(clientID.c_str());                             // no encryption on connection
 #endif
 
