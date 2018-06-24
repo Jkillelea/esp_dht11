@@ -7,12 +7,7 @@
 
 WiFiClient net;
 MQTTClient client;
-
-#ifdef _BOARD_NODEMCU_
-DHT dht(D7, DHT11);
-#else // Huzzah board
-DHT dht(13, DHT11);
-#endif
+DHT dht(DHT_PIN, DHT11);
 
 // callback, but we do nothing
 void messageReceived(String topic, String data, char* payloadBytes, uint32_t len) {}
@@ -26,9 +21,7 @@ void setup() {
   dht.begin();
 
   D Serial.println("WiFi.begin");
-  WiFi.mode(WIFI_STA);
-  WiFi.persistent(true);
-  WiFi.begin(WIFI_SSID, WIFI_PW);
+  // WiFi.persistent(true);
   D wifiPrintAvailableNetworks();
 
   connect();
@@ -39,6 +32,7 @@ void setup() {
   client.disconnect();
 
   D Serial.println("ESP.deepSleep");
+  D Serial.println(String(SLEEP_TIME/SEC_MICROSEC) + " seconds");
   ESP.deepSleep(SLEEP_TIME);
 }
 
@@ -64,6 +58,9 @@ void connect() {
   D Serial.println("connect");
   const uint32_t pause_between_checks = 500; // milliseconds
   uint64_t start_milis = millis();
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PW);
 
   if (WiFi.status() != WL_CONNECTED) {
     D Serial.println("WiFi not connected");
