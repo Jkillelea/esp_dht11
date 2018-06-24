@@ -12,16 +12,14 @@ $stdout.sync = true
 
 begin
   MQTT::Client.connect(conn_opts) do |client|
-    client.get(['+/temperature', '+/humidity']) do |topic, message|
-      $stdout.puts "#{topic}|#{message}"
+    #client.get(['+/temperature', '+/humidity']) do |topic, message|
+    client.get('#') do |topic, message|
+      puts "#{Time::now.to_i} #{topic} #{message}"
     end
   end
 rescue Interrupt
   exit
-rescue MQTT::ProtocolException => e # timeout
-  puts e
-  retry
-rescue Errno::ECONNRESET => e
+rescue Exception => e # timeout
   puts e
   retry
 end
